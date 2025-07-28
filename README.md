@@ -146,6 +146,213 @@ Example:
 }
 ```
 
+## 🤖 AI Model Usage Rules for Windsurf & Cursor
+
+### **CRITICAL: Read This Before Using MCP-Hub-MCP**
+
+**THIS IS YOUR CENTRAL HUB FOR ALL TOOLS.** This MCP server acts as a unified gateway to access ALL available tools from multiple MCP servers. Think of it as a "server of servers" that prevents context pollution and improves performance by managing tool discovery intelligently.
+
+### **📋 Essential Usage Workflow**
+
+#### **Step 1: ALWAYS Start with Tool Discovery**
+**NEVER** call tools blindly. **ALWAYS** discover tools first using these methods:
+
+**🎯 Method A: Smart Search (RECOMMENDED)**
+```
+Use: find-tools
+With pattern: "keyword related to what you want to do"
+Example: find-tools with pattern="file" to find file-related tools
+```
+
+**📋 Method B: Server-Specific Discovery**
+```
+Use: list-tools-in-server
+With serverName: "known_server_name"
+Example: list-tools-in-server with serverName="filesystem"
+```
+
+**⚠️ Method C: Complete Inventory (USE SPARINGLY)**
+```
+Use: list-all-tools
+WARNING: Only use when find-tools doesn't find what you need
+This returns ALL tools from ALL servers - can be overwhelming
+```
+
+#### **Step 2: Get Tool Details**
+Before calling any tool, get its complete schema:
+```
+Use: get-tool
+With: serverName="server_name" and toolName="exact_tool_name"
+This shows you the exact parameters and their types
+```
+
+#### **Step 3: Execute Tools**
+```
+Use: call-tool
+With: 
+- serverName: "exact_server_name" (from discovery)
+- toolName: "exact_tool_name" (from discovery) 
+- toolArgs: {"param1": "value1", "param2": "value2"}
+```
+
+### **🚨 CRITICAL RULES - NEVER VIOLATE THESE**
+
+1. **🔍 DISCOVERY FIRST**: Never call a tool without discovering it first via `find-tools` or similar
+2. **📝 EXACT NAMES**: Use EXACT serverName and toolName from discovery results - no guessing
+3. **🎯 BE SPECIFIC**: Use `find-tools` with specific patterns rather than `list-all-tools`
+4. **✅ VALIDATE SCHEMA**: Always use `get-tool` to understand parameters before calling
+5. **🧠 CONTEXT AWARENESS**: This hub prevents context pollution - use it efficiently
+
+### **💡 Smart Usage Patterns**
+
+#### **Pattern 1: File Operations**
+```
+1. find-tools with pattern="file|read|write"
+2. get-tool for the specific file tool you need
+3. call-tool with proper file paths and parameters
+```
+
+#### **Pattern 2: Web/HTTP Operations**
+```
+1. find-tools with pattern="web|http|api|request"
+2. get-tool to understand the HTTP tool parameters
+3. call-tool with proper URL and headers
+```
+
+#### **Pattern 3: Database Operations**
+```
+1. find-tools with pattern="database|sql|query"
+2. get-tool to understand connection parameters
+3. call-tool with proper connection strings and queries
+```
+
+### **⚡ Performance Optimization Rules**
+
+1. **🎯 Targeted Search**: Use specific keywords in `find-tools` rather than generic terms
+2. **🔄 Reuse Discovery**: Remember tool locations within the same conversation
+3. **📊 Batch Operations**: When possible, use tools that can handle multiple operations
+4. **🧹 Clean Responses**: The hub filters responses to show only name + description for discovery
+
+### **🛡️ Error Handling Guidelines**
+
+#### **When Tool Discovery Fails:**
+```
+1. Try different search patterns with find-tools
+2. Use list-all-tools as last resort
+3. Check if the required MCP server is configured
+```
+
+#### **When Tool Execution Fails:**
+```
+1. Verify serverName and toolName are exact matches
+2. Check tool schema with get-tool
+3. Validate all required parameters are provided
+4. Ensure proper data types for parameters
+```
+
+### **🔧 Configuration for Windsurf**
+
+Add to your `~/.codeium/mcp_config.json`:
+```json
+{
+  "mcpServers": {
+    "mcp-hub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-hub-mcp@latest",
+        "--config-path",
+        "~/.codeium/mcp-servers.json"
+      ]
+    }
+  }
+}
+```
+
+Create `~/.codeium/mcp-servers.json` with your actual MCP servers:
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/files"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_token"
+      }
+    }
+  }
+}
+```
+
+### **🔧 Configuration for Cursor**
+
+Add to your Cursor `mcp.json`:
+```json
+{
+  "mcpServers": {
+    "mcp-hub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-hub-mcp@latest",
+        "--config-path",
+        "~/.cursor/mcp-servers.json"
+      ]
+    }
+  }
+}
+```
+
+Create `~/.cursor/mcp-servers.json` with your actual MCP servers (same format as above).
+
+### **🎯 Example: Complete Workflow**
+
+```
+User: "I want to read a file and then search for some information online"
+
+AI Model Response:
+1. find-tools with pattern="file|read" 
+   → Discovers file reading tools
+2. find-tools with pattern="web|search|http"
+   → Discovers web search tools
+3. get-tool for file reading tool
+   → Gets exact parameters needed
+4. call-tool to read the file
+   → Executes file read
+5. get-tool for web search tool  
+   → Gets search parameters
+6. call-tool to search web
+   → Executes web search
+```
+
+### **⚠️ Common Mistakes to Avoid**
+
+❌ **DON'T**: Call tools without discovery  
+❌ **DON'T**: Guess server names or tool names  
+❌ **DON'T**: Use `list-all-tools` as first option  
+❌ **DON'T**: Ignore tool schemas from `get-tool`  
+❌ **DON'T**: Assume parameter formats  
+
+✅ **DO**: Always discover first with `find-tools`  
+✅ **DO**: Use exact names from discovery results  
+✅ **DO**: Check schemas with `get-tool`  
+✅ **DO**: Provide all required parameters  
+✅ **DO**: Use specific search patterns  
+
+### **🏆 Advanced Usage Tips**
+
+1. **🔄 Chain Operations**: Use results from one tool as input to another
+2. **📚 Learn Patterns**: Remember successful tool combinations
+3. **🎯 Context Optimization**: Use the hub's filtering to reduce noise
+4. **🛠️ Error Recovery**: Have fallback strategies for failed tool calls
+5. **📊 Batch Processing**: Prefer tools that can handle multiple items
+
+**Remember: This hub exists to make you more efficient and accurate. Use its discovery features actively, and always validate before executing.**
+
 ## Usage
 
 The MCP-Hub-MCP server provides the following tools:
